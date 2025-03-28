@@ -321,19 +321,19 @@ void menu()
             case 1:
             	printf("\033[2J\033[H");
                 displayHeader("Add New Emergency Contact");
-                printf("%sEnter Name:%s ", YELLOW, RESET);
+                printf("%sEnter Contact Name:%s ", YELLOW, RESET);
                 fgets(name, sizeof(name), stdin);
                 name[strcspn(name, "\n")] = '\0';
                 
-                printf("%sEnter Type (Police, Fire, Hospital, etc.):%s ", YELLOW, RESET);
+                printf("%sEnter Contact Type (Police, Fire, Hospital, etc.):%s ", YELLOW, RESET);
                 fgets(type, sizeof(type), stdin);
                 type[strcspn(type, "\n")] = '\0';
                 
-                printf("%sEnter Phone:%s ", YELLOW, RESET);
+                printf("%sEnter Contact number:%s ", YELLOW, RESET);
                 fgets(phone, sizeof(phone), stdin);
                 phone[strcspn(phone, "\n")] = '\0';
                 
-                printf("%sEnter Priority (1-10):%s ", YELLOW, RESET);
+                printf("%sEnter Contact Priority (1-10):%s ", YELLOW, RESET);
                 scanf("%d", &priority);
                 getchar();  // Consume newline
 
