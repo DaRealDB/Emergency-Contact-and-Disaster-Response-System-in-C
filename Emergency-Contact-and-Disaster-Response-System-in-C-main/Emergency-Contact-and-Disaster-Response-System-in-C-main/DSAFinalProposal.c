@@ -115,25 +115,6 @@ void insertContact(char name[], char type[], char phone[], int priority)
     printf("%sContact added successfully!%s\n", GREEN, RESET);
 }
 
-void getHighestPriorityContact() 
-{
-    if(heapSize == 0) 
-    {
-        printf("%sNo contacts available.%s\n", RED, RESET);
-        return;
-    }
-
-    displayHeader("Highest Priority Contact");
-    printf("%sName:%s %s\n", YELLOW, RESET, heap[0].name);
-    printf("%sType:%s %s\n", YELLOW, RESET, heap[0].type);
-    printf("%sPhone:%s %s\n", YELLOW, RESET, heap[0].phone);
-    printf("%sPriority:%s %d\n", YELLOW, RESET, heap[0].priority);
-
-    heap[0] = heap[heapSize - 1];
-    heapSize--;
-    heapify(0);
-}
-
 int hashFunction(char *type) 
 {
     int sum = 0;
@@ -195,7 +176,7 @@ void saveContactsToFile()
     }
     for(i = 0; i < heapSize; i++) 
     {
-        fprintf(file, "%s,%s,%s,%d\n", heap[i].name, heap[i].type, heap[i].phone, heap[i].priority);
+        fprintf(file, "Contact Name:%s, Contact Type:%s, Contact Number:%s, Priority:%d\n", heap[i].name, heap[i].type, heap[i].phone, heap[i].priority);
     }
     fclose(file);
     showProgressBar("Saving contacts to file", 800);
@@ -297,6 +278,19 @@ void displaySplashScreen() {
     printf("\033[2J\033[H");
 }
 
+void DisasterReportLogging(){
+	//Users can log reports of disaster. Must be saved in text file and be seen while running the program
+}
+
+void DeleteContact(){
+	//Deletes contact in Display All Contacts function
+}
+
+void UpdateContact(){
+	//Updates the contact in Display All Contacts function
+}
+
+
 void menu() 
 {
     int choice;
@@ -310,12 +304,11 @@ void menu()
         displayHeader("Emergency Contact & Disaster Response System");
         
         printf("%s 1 %s Add New Contact\n", YELLOW, RESET);
-        printf("%s 2 %s Get Highest Priority Contact\n", YELLOW, RESET);
-        printf("%s 3 %s Search Contact by Type\n", YELLOW, RESET);
-        printf("%s 4 %s Display All Contacts\n", YELLOW, RESET);
-        printf("%s 5 %s Save Contacts to File\n", YELLOW, RESET);
-        printf("%s 6 %s Load Contacts from File\n", YELLOW, RESET);
-        printf("%s 7 %s Exit Program\n\n", RED, RESET);
+        printf("%s 2 %s Search Contact by Type\n", YELLOW, RESET);
+        printf("%s 3 %s Display All Contacts\n", YELLOW, RESET);
+        printf("%s 4 %s Save Contacts to File\n", YELLOW, RESET);
+        printf("%s 5 %s Load Contacts from File\n", YELLOW, RESET);
+        printf("%s 6 %s Exit Program\n\n", RED, RESET);
         
         printf("%sEnter your choice [1-7]:%s ", CYAN, RESET);
         scanf("%d", &choice);
@@ -360,13 +353,6 @@ void menu()
 
             case 2:
             	printf("\033[2J\033[H");
-                getHighestPriorityContact();
-                printf("\n%sPress Enter to continue...%s", CYAN, RESET);
-                getchar();
-                break;
-                printf("\033[2J\033[H");
-            case 3:
-            	printf("\033[2J\033[H");
                 displayHeader("Search Contact by Type");
                 printf("%sEnter Contact Type to Search:%s ", YELLOW, RESET);
                 fgets(type, sizeof(type), stdin);
@@ -378,7 +364,7 @@ void menu()
                 printf("\033[2J\033[H");
                 break;
                 
-            case 4:
+            case 3:
             	printf("\033[2J\033[H");
                 displayContacts();
                 printf("\n%sPress Enter to continue...%s", CYAN, RESET);
@@ -386,7 +372,7 @@ void menu()
                 printf("\033[2J\033[H");
                 break;
                 printf("\033[2J\033[H");
-            case 5:
+            case 4:
             	printf("\033[2J\033[H");
                 saveContactsToFile();
                 printf("\n%sPress Enter to continue...%s", CYAN, RESET);
@@ -394,7 +380,7 @@ void menu()
                 printf("\033[2J\033[H");
                 break;
 
-            case 6:
+            case 5:
             	printf("\033[2J\033[H");
                 loadContactsFromFile();
                 printf("\n%sPress Enter to continue...%s", CYAN, RESET);
@@ -402,7 +388,7 @@ void menu()
                 printf("\033[2J\033[H");
                 break;
                 
-            case 7:
+            case 6:
                 displayHeader("Exiting Program");
                 animateText("Thank you for using Emergency Contact System!", 30);
                 animateText("Saving your data...", 30);
@@ -415,7 +401,7 @@ void menu()
                 usleep(1500000);  // 1.5 second delay
                 printf("\033[2J\033[H");
         }
-    } while(choice != 7);
+    } while(choice != 6);
 }
 
 int main() 
