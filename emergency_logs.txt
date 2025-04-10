@@ -1,0 +1,12 @@
+Emergency Type: Fire
+Contacted: Poppy (1)
+Time: 17:11:59
+----------------------------------------
+Emergency Type: Fire
+Contacted: Poppy (1)
+Time: 17:13:22
+----------------------------------------
+Emergency Type: Fire
+Contacted: Michael (13432423)
+Time: 17:23:06
+----------------------------------------

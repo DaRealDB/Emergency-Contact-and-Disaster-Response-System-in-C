@@ -1,0 +1,5 @@
+Contact Name:Michael Rajetla, Contact Type:Hospital, Contact Number:123, Priority:7
+Contact Name:Michael, Contact Type:Fire, Contact Number:13432423, Priority:3
+Contact Name:Growtopia, Contact Type:Hospital, Contact Number:456, Priority:2
+Contact Name:Poppy, Contact Type:Fire, Contact Number:1, Priority:1
+Contact Name:Gay, Contact Type:Police, Contact Number:656, Priority:2
