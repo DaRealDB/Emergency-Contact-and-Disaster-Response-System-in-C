@@ -1,4 +1,0 @@
-Accident
-Earthquake
-Pandemic
-Fire
