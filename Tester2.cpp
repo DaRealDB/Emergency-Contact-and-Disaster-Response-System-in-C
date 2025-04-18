@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>  // For sleep function
-#define MAX_LINE 100
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<unistd.h>  // For sleep function
+#include<time.h> //For Timestamp in disaster_reports.txt
+
 #define MAX_CONTACTS 100
 #define TABLE_SIZE 10
 
@@ -15,6 +16,8 @@
 #define CYAN    "\033[1;36m"
 #define WHITE   "\033[1;37m"
 #define RESET   "\033[0m"
+
+int isLoading = 0; 
 
 typedef struct 
 {
@@ -94,10 +97,19 @@ void heapify(int i)
     }
 }
 
+char* getCurrentTime() 
+{
+    static char timestamp[50];
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    strftime(timestamp, sizeof(timestamp), "%I:%M %p", t);  // 12-hour format with AM/PM
+    return timestamp;
+}
+
 void insertContact(char name[], char type[], char phone[], int priority) 
 {
     if(heapSize >= MAX_CONTACTS) 
-    {
+	{
         printf("%sContact list is full!%s\n", RED, RESET);
         return;
     }
@@ -111,13 +123,32 @@ void insertContact(char name[], char type[], char phone[], int priority)
     heapSize++;
 
     while(i > 0 && heap[(i - 1) / 2].priority < heap[i].priority) 
-    {
+	{
         swap(&heap[i], &heap[(i - 1) / 2]);
         i = (i - 1) / 2;
     }
 
-    //showProgressBar("Adding contact", 500);
-    //printf("%sContact added successfully!%s\n", GREEN, RESET);
+    // Log to disaster_reports.txt only if not loading
+    if(!isLoading) 
+	{
+        FILE *logFile = fopen("Contact_logs.txt", "a");
+        if(logFile) 
+		{
+            time_t now = time(NULL);
+            struct tm *t = localtime(&now);
+
+            char timestamp[50];
+            strftime(timestamp, sizeof(timestamp), "%I:%M %p", t);  // 12-hour format with AM/PM
+
+            fprintf(logFile, "[%s] Added Emergency Contact - Name: %s, Type: %s, Phone: %s, Priority: %d\n", 
+                    timestamp, name, type, phone, priority);
+            fclose(logFile);
+        } 
+		else 
+		{
+            printf("%sFailed to write to disaster_reports.txt%s\n", RED, RESET);
+        }
+    }
 }
 
 int hashFunction(char *type) 
@@ -127,6 +158,7 @@ int hashFunction(char *type)
         sum += type[i];
     return sum % TABLE_SIZE;
 }
+
 
 void categorizeContact(Contact contact) 
 {
@@ -157,13 +189,27 @@ void editContact(int index)
 {
     char newName[50], newType[30], newPhone[15];
     int newPriority;
+    
+    // Log the current state before editing
+    FILE *logFile = fopen("Contact_logs.txt", "a");
+    if (logFile) 
+    {
+        time_t now = time(NULL);
+        struct tm *t = localtime(&now);
+        char timestamp[50];
+        strftime(timestamp, sizeof(timestamp), "%I:%M %p", t);  // 12-hour format
 
+        fprintf(logFile, "[%s] Updated Emergency Contact - Name: %s (Type: %s, Phone: %s, Priority: %d) -> ",
+                timestamp, heap[index].name, heap[index].type, heap[index].phone, heap[index].priority);
+        fclose(logFile);
+    }
+    
     printf("\n%sEditing Contact:%s %s\n", CYAN, RESET, heap[index].name);
     printf("%sPress Enter to skip a field without changing it.%s\n\n", YELLOW, RESET);
 
     printf("%sNew Name (Current: %s): %s", YELLOW, heap[index].name, RESET);
     fgets(newName, sizeof(newName), stdin);
-    if(newName[0] != '\n') 
+    if (newName[0] != '\n') 
     {
         newName[strcspn(newName, "\n")] = '\0'; // Remove newline
         strcpy(heap[index].name, newName);
@@ -171,7 +217,7 @@ void editContact(int index)
 
     printf("%sNew Type (Current: %s): %s", YELLOW, heap[index].type, RESET);
     fgets(newType, sizeof(newType), stdin);
-    if(newType[0] != '\n') 
+    if (newType[0] != '\n') 
     {
         newType[strcspn(newType, "\n")] = '\0';
         strcpy(heap[index].type, newType);
@@ -179,7 +225,7 @@ void editContact(int index)
 
     printf("%sNew Phone (Current: %s): %s", YELLOW, heap[index].phone, RESET);
     fgets(newPhone, sizeof(newPhone), stdin);
-    if(newPhone[0] != '\n') 
+    if (newPhone[0] != '\n') 
     {
         newPhone[strcspn(newPhone, "\n")] = '\0';
         strcpy(heap[index].phone, newPhone);
@@ -188,13 +234,28 @@ void editContact(int index)
     printf("%sNew Priority (Current: %d): %s", YELLOW, heap[index].priority, RESET);
     char priorityInput[10];
     fgets(priorityInput, sizeof(priorityInput), stdin);
-    if(priorityInput[0] != '\n') 
+    if (priorityInput[0] != '\n') 
     {
         sscanf(priorityInput, "%d", &newPriority);
         heap[index].priority = newPriority;
     }
 
-	saveContactsToFile();
+    saveContactsToFile();  // Save updated contact to the main file
+    
+    // Log the update with new details
+    logFile = fopen("Contact_logs.txt", "a");
+    if (logFile) 
+    {
+        time_t now = time(NULL);
+        struct tm *t = localtime(&now);
+        char timestamp[50];
+        strftime(timestamp, sizeof(timestamp), "%I:%M %p", t);  // 12-hour format
+
+        fprintf(logFile, "Name: %s, Type: %s, Phone: %s, Priority: %d\n", 
+                heap[index].name, heap[index].type, heap[index].phone, heap[index].priority);
+        fclose(logFile);
+    }
+
     printf("\n%sContact updated successfully!%s\n", GREEN, RESET);
 }
 
@@ -265,27 +326,32 @@ void loadContactsFromFile()
 {
     FILE *file = fopen("contacts.txt", "r");
     if(!file) 
-    {
+	{
         printf("%sNo saved contacts found.%s\n", RED, RESET);
         return;
     }
 
-    char line[200]; // Buffer to read each line
+    char line[200];  // Buffer to read each line
     char name[50], type[30], phone[15];
     int priority;
-    
+
     // Clear existing contacts
     heapSize = 0;
 
-    while(fgets(line, sizeof(line), file)) 
-    {
+    // Set the flag to skip logging while loading
+    isLoading = 1;
+
+    while(fgets(line, sizeof(line), file)) {
         // Extract data while skipping the labels
         if(sscanf(line, "Contact Name:%49[^,], Contact Type:%29[^,], Contact Number:%14[^,], Priority:%d",
-                   name, type, phone, &priority) == 4) 
-        {
+                   name, type, phone, &priority) == 4) {
             insertContact(name, type, phone, priority);
         }
     }
+
+    // Reset the flag after loading is complete
+    isLoading = 0;
+
     fclose(file);
 }
 
@@ -363,7 +429,7 @@ void displaySplashScreen()
 void DisasterReportLogging() 
 {
     char report[500];
-    FILE *file = fopen("disaster_reports.txt", "a");  // Open file in append mode
+    FILE *file = fopen("Contact_logs.txt", "a");  // Open file in append mode
 
     if(!file) 
 	{
@@ -387,7 +453,7 @@ void DisasterReportLogging()
 void DisplayDisasterReports() 
 {
     char report[500];
-    FILE *file = fopen("disaster_reports.txt", "r");
+    FILE *file = fopen("Contact_logs.txt", "r");
 
     if (!file) {
         printf("%sNo disaster reports found.%s\n", RED, RESET);
@@ -395,17 +461,16 @@ void DisplayDisasterReports()
     }
 
     displayHeader("All Disaster Reports");
-    while (fgets(report, sizeof(report), file)) {
+    while(fgets(report, sizeof(report), file)) {
         printf("%s- %s%s\n", CYAN, report, RESET);
     }
     fclose(file);
 }
 
-
 void DeleteContact() 
 {
-    if(heapSize == 0) 
-	{
+    if (heapSize == 0) 
+    {
         printf("%sNo contacts available to delete.%s\n", RED, RESET);
         return;
     }
@@ -424,6 +489,20 @@ void DeleteContact()
 
     deleteIndex--; // Convert to zero-based index
 
+    // Log the deletion action
+    FILE *logFile = fopen("Contact_logs.txt", "a");
+    if (logFile) 
+    {
+        time_t now = time(NULL);
+        struct tm *t = localtime(&now);
+        char timestamp[50];
+        strftime(timestamp, sizeof(timestamp), "%I:%M %p", t);  // 12-hour format
+
+        fprintf(logFile, "[%s] Deleted Emergency Contact - Name: %s, Type: %s, Phone: %s, Priority: %d\n", 
+                timestamp, heap[deleteIndex].name, heap[deleteIndex].type, heap[deleteIndex].phone, heap[deleteIndex].priority);
+        fclose(logFile);
+    }
+
     printf("%sDeleting contact: %s%s\n", RED, heap[deleteIndex].name, RESET);
 
     // Replace deleted element with last element
@@ -437,9 +516,9 @@ void DeleteContact()
     printf("%sContact deleted successfully!%s\n", RED, RESET);
 }
 
-
 void menu() 
 {
+	printf("\033[2J\033[H");
     int choice;
     char name[50], type[30], phone[15];
     int priority;
@@ -545,7 +624,7 @@ void menu()
                 usleep(1500000);  // 1.5 second delay
                 printf("\033[2J\033[H");
         }
-    } while(choice != 6);
+    } while(choice != 5);
 }
 
 
@@ -670,13 +749,26 @@ void speedDial() {
         fclose(logFile);
     }
     
-    printf("\nPress Enter to return to main menu...");
+    printf("\nPress Enter to return to go to emergency contacts...");
     getchar();
+    menu();
+  
 }
 
 
-void mainMenu(){
-	displaySplashScreen();
+
+
+int main() 
+{
+    // Initialize hash table
+    for(i = 0; i < TABLE_SIZE; i++) 
+	{
+        hashTable[i] = NULL;
+    }
+    
+    loadContactsFromFile();
+    
+    	displaySplashScreen();
 	  printf("+-------------------------+-------------------------+\n");
     printf("| Emergency              | Emergency               |\n");
     printf("| speed dial             | Contacts                |\n");
@@ -698,22 +790,7 @@ void mainMenu(){
     		printf("Enter valid Choice");
     		break;
 	}
-}
-
-
-
-
-
-int main() 
-{
-    // Initialize hash table
-    for(i = 0; i < TABLE_SIZE; i++) 
-	{
-        hashTable[i] = NULL;
-    }
-    
-    loadContactsFromFile();
-    mainMenu();
     
     return 0;
+    
 }
