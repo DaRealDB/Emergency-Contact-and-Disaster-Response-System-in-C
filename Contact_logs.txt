@@ -1,2 +1,4 @@
 [04:42 PM] Added Emergency Contact - Name: Labangon, Type: Flood, Phone: 19371, Priority: 1
 [04:43 PM] Updated Emergency Contact - Name: Labangon (Type: Flood, Phone: 19371, Priority: 1) -> Name: Labangon1, Type: Flood, Phone: 19381, Priority: 2
+[04:04 PM] Added Emergency Contact - Name: Fire, Type: Flood, Phone: 1836281, Priority: 1
+[04:12 PM] Deleted Emergency Contact - Name: Michael, Type: Fire, Phone: 13432423, Priority: 3

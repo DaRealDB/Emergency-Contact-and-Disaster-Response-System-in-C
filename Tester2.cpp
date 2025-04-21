@@ -516,6 +516,10 @@ void DeleteContact()
     printf("%sContact deleted successfully!%s\n", RED, RESET);
 }
 
+
+void menu();
+void speedDial();
+
 void menu() 
 {
 	printf("\033[2J\033[H");
@@ -531,9 +535,9 @@ void menu()
         printf("%s 1 %s Add New Contact\n", YELLOW, RESET);
         printf("%s 2 %s Search Contact by Type\n", YELLOW, RESET);
         printf("%s 3 %s Display All Contacts\n", YELLOW, RESET);
-        //printf("%s 4 %s Load Contacts from File\n", YELLOW, RESET);
-        printf("%s 4 %s Delete a Contact\n", YELLOW, RESET);
-        printf("%s 5 %s Exit Program\n\n", RED, RESET);
+        printf("%s 4 %s Emergency Dial\n", YELLOW, RESET);
+        printf("%s 5 %s Delete a Contact\n", YELLOW, RESET);
+        printf("%s 6 %s Exit Program\n\n", RED, RESET);
         
         printf("%sEnter your choice [1-5]:%s ", CYAN, RESET);
         scanf("%d", &choice);
@@ -601,7 +605,13 @@ void menu()
                 printf("\033[2J\033[H");
 			
 			case 4:
-				printf("\033[2J\033[H");
+				speedDial();
+   	 			break;
+   	 			
+                
+            case 5:
+            	
+                printf("\033[2J\033[H");
     			displayHeader("Delete a Contact");
     			DeleteContact();
     			saveContactsToFile();
@@ -610,21 +620,20 @@ void menu()
     			printf("\033[2J\033[H");
    	 			break;
    	 			
-                
-            case 5:
+				                
+             case 6:
                 displayHeader("Exiting Program");
                 animateText("Thank you for using Emergency Contact System!", 30);
                 animateText("Saving your data...", 30);
                 saveContactsToFile();
                 animateText("Goodbye!", 50);
-                break;                   
-                
+                break;                
             default:
                 printf("%sInvalid choice! Please try again.%s\n", RED, RESET);
                 usleep(1500000);  // 1.5 second delay
                 printf("\033[2J\033[H");
         }
-    } while(choice != 5);
+    } while(choice != 6);
 }
 
 

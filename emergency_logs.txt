@@ -2,3 +2,7 @@ Emergency Type: Fire
 Contacted: Friedmann (2543310)
 Time: 16:39:28
 ----------------------------------------
+Emergency Type: Fire
+Contacted: Michael (13432423)
+Time: 16:02:36
+----------------------------------------
